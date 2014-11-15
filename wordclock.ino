@@ -148,20 +148,23 @@ struct wordlist* minute2words(float minute) {
   return cur;
 }
 
-const struct position* int2positions(int n) {
+struct wordlist* wordarray2list(const struct wordpos array[], int length) {
   struct wordlist* cur = NULL;
-  const struct position* pos = NULL;
+  for(uint8_t i = 0; i < length; i++) {
+    add_word(&cur, &(array[i]));
+  }
+  return cur;
+}
+
+const struct position* int2positions(int n) {
   struct position offset = { NULL, 5, 2 };
-  for(uint8_t i = 0; i < 5; i++) {
-    add_word(&cur, &digits[n % 10][i]);
-  }
-  pos = words2positions(cur, offset, NULL);
+  struct wordlist* cur = wordarray2list(&mode_led[mode], 1);
+  const struct position* pos = words2positions(cur);
+  cur = wordarray2list(digits[n % 10], 5);
+  pos = words2positions(cur, offset, pos);
   free_list(cur);
-  cur = NULL;
   offset.x = 1;
-  for(uint8_t i = 0; i < 5; i++) {
-    add_word(&cur, &digits[n / 10][i]);
-  }
+  cur = wordarray2list(digits[n / 10], 5);
   pos = words2positions(cur, offset, pos);
   free_list(cur);
   return pos;
