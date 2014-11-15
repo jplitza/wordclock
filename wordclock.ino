@@ -123,10 +123,12 @@ void print_positions(const struct position* pos) {
 }
 
 void add_word(struct wordlist** cur, const struct wordpos* insert) {
-  struct wordlist* ret = (struct wordlist*) malloc(sizeof(struct wordlist));
-  ret->next = *cur;
-  ret->wordpos = insert;
-  *cur = ret;
+  if(insert != NULL && insert->length > 0) {
+    struct wordlist* ret = (struct wordlist*) malloc(sizeof(struct wordlist));
+    ret->next = *cur;
+    ret->wordpos = insert;
+    *cur = ret;
+  }
 }
 
 struct wordlist* minute2words(float minute) {
@@ -242,26 +244,24 @@ void loop() {
     nextUpdate = millis();
   }
   if(millis() >= nextUpdate) {
-    struct wordlist* wlist;
-    float m = minute() + second() / 60.0;
-    int h = hour();
     free_list(plist);
-    switch(mode) {
-      case MODE_NORMAL:
-        Serial.print(h);
-        Serial.print(":");
-        Serial.print(m);
-        Serial.print(":");
-        Serial.println(second());
-        wlist = minute2words(m);
-        add_word(&wlist, &hours[(h + (m >= 22.5? 1 : 0)) % 12]);
-        nextUpdate += UPDATE_INTERVAL;
-        plist = words2positions(wlist);
-        free_list(wlist);
-        break;
-      default:
-        plist = int2positions(modeSetting[mode]);
-        break;
+    if(mode == MODE_NORMAL) {
+      struct wordlist* wlist;
+      float m = minute() + second() / 60.0;
+      int h = hour();
+      Serial.print(h);
+      Serial.print(":");
+      Serial.print(m);
+      Serial.print(":");
+      Serial.println(second());
+      wlist = minute2words(m);
+      add_word(&wlist, &hours[(h + (m >= 22.5? 1 : 0)) % 12]);
+      nextUpdate += UPDATE_INTERVAL;
+      plist = words2positions(wlist);
+      free_list(wlist);
+    } else {
+      nextUpdate = (unsigned long) -1;
+      plist = int2positions(modeSetting[mode]);
     }
   }
   light_positions(plist);
