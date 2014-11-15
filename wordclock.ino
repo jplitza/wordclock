@@ -190,6 +190,16 @@ void test_lights(int wait) {
   }
 }
 
+void easteregg(int duration) {
+  const wordlist* list = wordarray2list(digits[10], 5);
+  const position* pos = words2positions(list);
+  free_list(list);
+  const unsigned long until = millis() + duration;
+  while(millis() < until) {
+    light_positions(pos);
+  }
+}
+
 void setup() {
   Serial.begin(9600);
   pinMode(PIN_DATA_X, OUTPUT);
@@ -229,6 +239,7 @@ void loop() {
     if(setButtonState) {
       if(mode == MODE_NORMAL) {
         test_lights();
+        easteregg(5000);
       } else {
         modeSetting[mode] = (modeSetting[mode] + 1) % modeMax[mode];
         nextUpdate = millis();
