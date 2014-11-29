@@ -137,6 +137,8 @@ struct wordlist* minute2words(float minute) {
   tmp = (tmp + 30) % 60 - 30; // shift [30,60) to [-30,0)
   if(abs(tmp) > 20) // HALB
     add_word(&cur, &minutes[4]);
+  else if(tmp == 0) // PUNKT
+    add_word(&cur, &minutes[7]);
   if(tmp % 30 != 0) {
     if((tmp > 0 && tmp <= 20) || tmp < -20) // NACH
       add_word(&cur, &minutes[5]);
@@ -191,7 +193,9 @@ void test_lights(int wait) {
 }
 
 void easteregg(int duration) {
-  const wordlist* list = wordarray2list(digits[10], 5);
+  int length;
+  while(easteregg_leds[length].length) length++;
+  const wordlist* list = wordarray2list(easteregg_leds, length);
   const position* pos = words2positions(list);
   free_list(list);
   const unsigned long until = millis() + duration;
