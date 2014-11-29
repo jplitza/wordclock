@@ -12,12 +12,7 @@
 uint8_t modeButtonState = 0;
 uint8_t setButtonState = 0;
 
-enum modes {
-  MODE_NORMAL,
-  MODE_HOURS,
-  MODE_MINUTES,
-  MODE_MAX
-} mode = MODE_NORMAL;
+modes mode = MODE_NORMAL;
 
 const char* modeNames[] = {"NORMAL", "HOURS", "MINUTES"};
 uint8_t modeSetting[] = {0, 0, 0};
@@ -79,8 +74,20 @@ const struct position* words2positions(const struct wordlist* cur, const struct 
       struct position* newpos = (struct position*) malloc(sizeof(struct position));
       newpos->next = pos;
 
-      newpos->x = cur->wordpos->x + (cur->wordpos->vertical? 0 : j) + offset.x;
-      newpos->y = cur->wordpos->y + (cur->wordpos->vertical? j : 0) + offset.y;
+      newpos->x = cur->wordpos->x + offset.x;
+      newpos->y = cur->wordpos->y + offset.y;
+      switch(cur->wordpos->orientation) {
+        case DIR_R:
+          newpos->y += j;
+        case DIR_H:
+          newpos->x += j;
+          break;
+        case DIR_L:
+          newpos->x -= j;
+        case DIR_V:
+          newpos->y += j;
+          break;
+      }
       pos = newpos;
     }
     cur = cur->next;
@@ -103,7 +110,7 @@ void print_words(struct wordlist* cur) {
     Serial.print(",");
     Serial.print(cur->wordpos->y);
     Serial.print(",");
-    Serial.print(cur->wordpos->vertical);
+    Serial.print(cur->wordpos->orientation);
     Serial.print(",");
     Serial.print(cur->wordpos->length);
     Serial.println("}");
